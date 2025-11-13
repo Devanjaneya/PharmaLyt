@@ -1,1 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaLytix - Login</title>
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --light-primary: #ecf3ff;
+            --sidebar-bg: #1c2536;
+            --sidebar-link: #adb5bd;
+            --sidebar-active: #ffffff;
+            --body-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--body-bg);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Wrapper Logic --- */
+        /* The Auth Wrapper (Login/Sign Up) */
+        #auth-wrapper {
+            display: none; /* Hidden by default, shown by JS */
+            height: 100vh;
+            width: 100vw;
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile-first: single column */
+        }
+
+        /* The App Wrapper (Main Application) */
+        #app-wrapper {
+            display: none; /* Hidden by default, shown by JS */
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* --- Auth Page Styling --- */
+        #auth-brand-col {
+            background: linear-gradient(135deg, var(--primary-color), #0a58ca);
+            color: white;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        #auth-brand-col h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        #auth-form-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background-color: #ffffff;
+        }
+        .auth-form-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        /* Form switching */
+        .auth-page { display: none; }
+        .auth-page.active { display: block; }
+        
+        /* Desktop: Two-column layout */
+        @media (min-width: 992px) {
+            #auth-wrapper {
+                grid-template-columns: 45% 55%;
+            }
+        }
+
+
+        /* --- Main App Styling (Copied from previous) --- */
+        #sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            color: white;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 1rem;
+        }
+        #sidebar .nav-link {
+            color: var(--sidebar-link);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        #sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        #sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--sidebar-active);
+        }
+        #sidebar .nav-link.active {
+            background-color: var(--primary-color);
+            color: var(--sidebar-active);
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+        }
+        #sidebar .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+        #sidebar .logo i {
+            color: #0d6efd;
+        }
+        #sidebar .sidebar-footer {
+            margin-top: auto;
+            color: var(--sidebar-link);
+            font-size: 0.9rem;
+        }
+        /* New Logout Button */
+        #logout-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+        }
+        #logout-btn:hover {
+            background: #dc3545;
+        }
+
+
+        /* --- Main Content --- */
+        #main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            height: 100vh;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        .stat-card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+        .stat-card .card-body { display: flex; align-items: center; justify-content: space-between; }
+        .stat-card .icon-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-header { background-color: var(--light-primary); }
+        .modal.fade .modal-dialog { transform: translate(0, -10%); }
+        .modal.show .modal-dialog { transform: none; }
+        #billing-cart {
+            background: #fff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        #billing-cart .list-group-item { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <!-- =================================== -->
+    <!-- 1. AUTHENTICATION WRAPPER           -->
+    <!-- =================================== -->
+    <div id="auth-wrapper">
+        
+        <!-- Left Column (Brand) -->
+        <div id="auth-brand-col">
+            <h1 class="mb-3"><i class="bi bi-capsule-pill"></i> PharmaLytix</h1>
+            <p class="fs-5">The high-performance pharmacy management system built for speed, accuracy, and efficiency.</p>
+        </div>
+
+        <!-- Right Column (Forms) -->
+        <div id="auth-form-col">
+            <div class="auth-form-container">
+                
+                <!-- Login Page -->
+                <div id="login-page" class="auth-page active">
+                    <h2 class="h1 mb-3 fw-bold">Login</h2>
+                    <p class="text-muted mb-4">Welcome back! Please login to your account.</p>
+                    
+                    <div id="login-alert" class="alert alert-danger d-none"></div>
+
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-lg" id="login-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="login-password" required>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                        </div>
+                    </form>
+                    <p class="mt-4 text-center">
+                        Don't have an account? <a href="#" id="show-signup-btn">Sign Up</a>
+                    </p>
+                </div>
+
+                <!-- Sign Up Page -->
+                <div id="signup-page" class="auth-page">
+                    <h2 class="h1 mb-3 fw-bold">Create Account</h2>
+                    <p class="text-muted mb-4">Get started by creating a new account.</p>
+                    
+                    <div id="signup-alert" class="alert alert-danger d-none"></div>
+
+                    <form id="signup-form" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="signup-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control form-control-lg" id="signup-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-email" class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-lg" id="signup-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-lg" id="signup-password" required minlength="6">
+                            <div class="invalid-feedback">Password must be at least 6 characters.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-confirm-password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control form-control-lg" id="signup-confirm-password" required>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                        </div>
+                    </form>
+                    <p class="mt-4 text-center">
+                        Already have an account? <a href="#" id="show-login-btn">Login</a>
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =================================== -->
+    <!-- 2. MAIN APPLICATION WRAPPER         -->
+    <!-- =================================== -->
+    <div id="app-wrapper">
+        <!-- 2a. SIDEBAR NAVIGATION -->
+        <nav id="sidebar">
+            <div class="logo"><i class="bi bi-capsule-pill"></i> PharmaLytix</div>
+            <ul class="nav flex-column nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" data-page="page-dashboard"><i class="bi bi-grid-1x2-fill"></i>Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="page-inventory"><i class="bi bi-archive-fill"></i>Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-page="page-billing"><i class="bi bi-calculator-fill"></i>Billing (POS)</a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <p id="welcome-user" class="fw-medium">Welcome!</p>
+                <div class="d-grid">
+                    <button class="btn btn-sm" id="logout-btn"><i class="bi bi-box-arrow-left me-2"></i>Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 2b. MAIN CONTENT AREA -->
+        <main id="main-content">
+
+            <!-- ===== PAGE: DASHBOARD ===== -->
+            <div id="page-dashboard" class="page active">
+                <h1 class="h2 mb-4">Dashboard</h1>
+                <div class="row g-4">
+                    <!-- Stat Card 1 -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Sales Today</h6>
+                                    <h4 class="mb-0" id="dash-sales-today">₹0.00</h4>
+                                </div>
+                                <div class="icon-circle bg-success-subtle text-success">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stat Card 2 -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="text-muted mb-1">Total Medicines</h6>
+                                    <h4 class="mb-0" id="dash-total-medicines">0</h4>
+                                </div>
+                                <div class="icon-circle bg-primary-subtle text-primary">
+                                    <i class="bi bi-archive-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stat Card 3 -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="text-muted mb-1">Low Stock Items</h6>
+                                    <h4 class="mb-0" id="dash-low-stock">0</h4>
+                                </div>
+                                <div class="icon-circle bg-warning-subtle text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Stat Card 4 -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div>
+                                    <h6 class="text-muted mb-1">Expired Items</h6>
+                                    <h4 class="mb-0" id="dash-expired">0</h4>
+                                </div>
+                                <div class="icon-circle bg-danger-subtle text-danger">
+                                    <i class="bi bi-x-octagon-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mt-3">
+                    <div class="col-lg-8">
+                        <div class="card stat-card">
+                            <div class="card-header bg-transparent border-0">
+                                <h5 class="mb-0">Recent Bills</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Bill ID</th>
+                                                <th>Items</th>
+                                                <th>Total</th>
+                                                <th>Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dash-recent-bills-table">
+                                            <tr><td colspan="4" class="text-center p-3 text-muted">No recent bills.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card stat-card">
+                            <div class="card-header bg-transparent border-0">
+                                <h5 class="mb-0">Quick Actions</h5>
+                            </div>
+                            <div class="card-body d-grid gap-2">
+                                <button class="btn btn-primary btn-lg" onclick="showPage('page-billing')"><i class="bi bi-plus-circle-fill me-2"></i>New Bill</button>
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addMedicineModal"><i class="bi bi-archive me-2"></i>Add Medicine</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: INVENTORY ===== -->
+            <div id="page-inventory" class="page">
+                <div class="page-header">
+                    <h1 class="h2 mb-0">Medicine Inventory</h1>
+                    <div class="d-flex gap-2">
+                        <input type="search" class="form-control" style="width: 300px;" placeholder="Search inventory..." id="inventory-search">
+                        <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Medicine
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card stat-card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Medicine ID</th>
+                                        <th>Name</th>
+                                        <th>Batch No.</th>
+                                        <th>Stock</th>
+                                        <th>Price (₹)</th>
+                                        <th>Expiry Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PAGE: BILLING (POS) ===== -->
+            <div id="page-billing" class="page">
+                <h1 class="h2 mb-4">Billing / Point of Sale</h1>
+                <div class="row g-4">
+                    <div class="col-lg-7">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="billing-medicine-search" class="form-label">Search Medicine (by Name)</label>
+                                    <input type="search" class="form-control" id="billing-medicine-search" placeholder="Type medicine name to add to cart...">
+                                    <div id="billing-search-results" class="list-group mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div id="billing-cart">
+                            <h4 class="mb-3">Current Bill</h4>
+                            <ul class="list-group mb-3" id="billing-cart-items">
+                                <li class="list-group-item text-muted text-center">Cart is empty</li>
+                            </ul>
+                            
+                            <div class="d-flex justify-content-between">
+                                <h6 class="text-muted">Subtotal</h6>
+                                <h6 id="billing-subtotal">₹0.00</h6>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <h6 class="text-muted">Tax (5%)</h6>
+                                <h6 id="billing-tax">₹0.00</h6>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <h5 class="fw-bold">Total</h5>
+                                <h5 class="fw-bold" id="billing-total">₹0.00</h5>
+                            </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <button class="btn btn-success btn-lg" id="billing-checkout-btn" disabled>
+                                    <i class="bi bi-check-circle-fill me-2"></i>Complete & Print Bill
+                                </button>
+                                <button class="btn btn-outline-danger" id="billing-cancel-btn">
+                                    <i class="bi bi-x-circle me-2"></i>Cancel Bill
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- 3. MODALS (for the main app) -->
+    <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form id="medicine-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="medicineModalTitle">Add New Medicine</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="medicine-id">
+                        <div class="row g-3">
+                            <div class="col-md-6"><label for="medicine-name" class="form-label">Medicine Name</label><input type="text" class="form-control" id="medicine-name" required></div>
+                            <div class="col-md-6"><label for="medicine-batch" class="form-label">Batch No.</label><input type="text" class="form-control" id="medicine-batch" required></div>
+                            <div class="col-md-4"><label for="medicine-stock" class="form-label">Stock (Quantity)</label><input type="number" class="form-control" id="medicine-stock" min="0" required></div>
+                            <div class="col-md-4"><label for="medicine-price" class="form-label">Price (per unit)</label><input type="number" class="form-control" id="medicine-price" min="0" step="0.01" required></div>
+                            <div class="col-md-4"><label for="medicine-expiry" class="form-label">Expiry Date</label><input type="date" class="form-control" id="medicine-expiry" required></div>
+                            <div class="col-12"><label for="medicine-desc" class="form-label">Description (Optional)</label><textarea class="form-control" id="medicine-desc" rows="2"></textarea></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="medicine-form-submit">Save Medicine</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Main Application JavaScript -->
+    <script>
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATABASE SIMULATION (LocalStorage) ---
+            const dbGet = (key) => JSON.parse(localStorage.getItem(key) || '[]');
+            const dbSet = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+
+            // --- AUTHENTICATION ELEMENTS ---
+            const authWrapper = document.getElementById('auth-wrapper');
+            const appWrapper = document.getElementById('app-wrapper');
+            
+            const loginPage = document.getElementById('login-page');
+            const signupPage = document.getElementById('signup-page');
+            
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            
+            const showSignupBtn = document.getElementById('show-signup-btn');
+            const showLoginBtn = document.getElementById('show-login-btn');
+            
+            const loginAlert = document.getElementById('login-alert');
+            const signupAlert = document.getElementById('signup-alert');
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            const welcomeUser = document.getElementById('welcome-user');
+
+            // --- AUTHENTICATION LOGIC ---
+
+            // Function to show/hide auth alerts
+            const showAuthAlert = (alertEl, message) => {
+                alertEl.textContent = message;
+                alertEl.classList.remove('d-none');
+            };
+            const hideAuthAlerts = () => {
+                loginAlert.classList.add('d-none');
+                signupAlert.classList.add('d-none');
+            };
+            
+            // Switch to Sign Up page
+            showSignupBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginPage.classList.remove('active');
+                signupPage.classList.add('active');
+                hideAuthAlerts();
+            });
+            
+            // Switch to Login page
+            showLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signupPage.classList.remove('active');
+                loginPage.classList.add('active');
+                hideAuthAlerts();
+            });
+
+            // Handle Sign Up
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (!signupForm.checkValidity()) {
+                    e.stopPropagation();
+                    signupForm.classList.add('was-validated');
+                    return;
+                }
+                
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const pass1 = document.getElementById('signup-password').value;
+                const pass2 = document.getElementById('signup-confirm-password').value;
+
+                if (pass1 !== pass2) {
+                    showAuthAlert(signupAlert, 'Passwords do not match.');
+                    return;
+                }
+
+                const users = dbGet('pharmaUsers');
+                if (users.find(u => u.email === email)) {
+                    showAuthAlert(signupAlert, 'An account with this email already exists.');
+                    return;
+                }
+                
+                // Add new user (In a real app, hash the password)
+                users.push({ name, email, password: pass1 });
+                dbSet('pharmaUsers', users);
+                
+                // Success! Switch to login page
+                alert('Account created successfully! Please login.');
+                showLoginBtn.click();
+                loginForm.reset();
+                signupForm.reset();
+                signupForm.classList.remove('was-validated');
+            });
+
+            // Handle Login
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                const users = dbGet('pharmaUsers');
+                const user = users.find(u => u.email === email && u.password === password);
+
+                if (user) {
+                    // Login success!
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userName', user.name);
+                    location.reload(); // Easiest way to trigger checkAuth
+                } else {
+                    showAuthAlert(loginAlert, 'Invalid email or password.');
+                }
+            });
+
+            // Handle Logout
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.clear();
+                location.reload();
+            });
+
+            // --- MAIN APPLICATION LOGIC (WRAPPED) ---
+            
+            // This function contains all the code from the previous version
+            const initApp = () => {
+                // Set welcome message
+                welcomeUser.textContent = `Welcome, ${sessionStorage.getItem('userName')}`;
+
+                // Initialize mock data if empty
+                const initMockData = () => {
+                    if (!localStorage.getItem('inventory')) {
+                        const mockInventory = [
+                            { id: 1, name: "Paracetamol 500mg", batch: "P123", stock: 150, price: 2.50, expiry: "2025-12-31", desc: "" },
+                            { id: 2, name: "Amoxicillin 250mg", batch: "A456", stock: 80, price: 5.00, expiry: "2026-06-30", desc: "" },
+                            { id: 3, name: "Atorvastatin 20mg", batch: "T789", stock: 20, price: 10.00, expiry: "2025-05-31", desc: "" },
+                            { id: 4, name: "Cough Syrup", batch: "C101", stock: 120, price: 8.50, expiry: "2026-10-31", desc: "" },
+                            { id: 5, name: "Expired Med", batch: "E101", stock: 50, price: 5.00, expiry: "2023-01-01", desc: "" },
+                        ];
+                        dbSet('inventory', mockInventory);
+                    }
+                    if (!localStorage.getItem('bills')) {
+                        dbSet('bills', []);
+                    }
+                };
+
+                // --- STATE & UI MANAGEMENT ---
+                const pages = document.querySelectorAll('.page');
+                const navLinks = document.querySelectorAll('#sidebar .nav-link');
+                const inventoryTableBody = document.getElementById('inventory-table-body');
+                
+                window.showPage = (pageId) => {
+                    pages.forEach(page => page.classList.remove('active'));
+                    const targetPage = document.getElementById(pageId);
+                    if (targetPage) targetPage.classList.add('active');
+                    
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.dataset.page === pageId) link.classList.add('active');
+                    });
+                    
+                    if (pageId === 'page-dashboard') renderDashboard();
+                    if (pageId === 'page-inventory') renderInventoryTable();
+                    if (pageId === 'page-billing') resetBill();
+                };
+
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showPage(e.currentTarget.dataset.page);
+                    });
+                });
+
+                // --- DASHBOARD LOGIC ---
+                const renderDashboard = () => {
+                    const inventory = dbGet('inventory');
+                    const bills = dbGet('bills');
+                    const today = new Date().toISOString().split('T')[0];
+                    const todaySales = bills.filter(bill => bill.date === today).reduce((sum, bill) => sum + bill.total, 0);
+                    document.getElementById('dash-sales-today').textContent = `₹${todaySales.toFixed(2)}`;
+                    document.getElementById('dash-total-medicines').textContent = inventory.length;
+                    const lowStock = inventory.filter(med => med.stock < 30 && new Date(med.expiry) > new Date()).length;
+                    document.getElementById('dash-low-stock').textContent = lowStock;
+                    const expired = inventory.filter(med => new Date(med.expiry) <= new Date()).length;
+                    document.getElementById('dash-expired').textContent = expired;
+                    const recentBillsTable = document.getElementById('dash-recent-bills-table');
+                    recentBillsTable.innerHTML = '';
+                    const recentBills = bills.slice(-5).reverse();
+                    if (recentBills.length === 0) {
+                        recentBillsTable.innerHTML = '<tr><td colspan="4" class="text-center p-3 text-muted">No recent bills.</td></tr>';
+                        return;
+                    }
+                    recentBills.forEach(bill => {
+                        recentBillsTable.innerHTML += `
+                            <tr>
+                                <td>${bill.id}</td>
+                                <td>${bill.items.length}</td>
+                                <td>₹${bill.total.toFixed(2)}</td>
+                                <td>${bill.date}</td>
+                            </tr>
+                        `;
+                    });
+                };
+
+                // --- INVENTORY LOGIC ---
+                const medicineModal = new bootstrap.Modal(document.getElementById('addMedicineModal'));
+                const medicineForm = document.getElementById('medicine-form');
+                const medicineModalTitle = document.getElementById('medicineModalTitle');
+                const medicineSubmitBtn = document.getElementById('medicine-form-submit');
+                
+                const renderInventoryTable = (filter = '') => {
+                    const inventory = dbGet('inventory');
+                    inventoryTableBody.innerHTML = '';
+                    const lowStockLimit = 30;
+                    const today = new Date();
+                    const filteredInventory = inventory.filter(med => 
+                        med.name.toLowerCase().includes(filter.toLowerCase()) ||
+                        med.batch.toLowerCase().includes(filter.toLowerCase())
+                    );
+                    if (filteredInventory.length === 0) {
+                        inventoryTableBody.innerHTML = '<tr><td colspan="8" class="text-center p-3 text-muted">No medicines found.</td></tr>';
+                        return;
+                    }
+                    filteredInventory.forEach(med => {
+                        const isExpired = new Date(med.expiry) <= today;
+                        const isLowStock = med.stock < lowStockLimit && !isExpired;
+                        let statusBadge;
+                        if (isExpired) statusBadge = `<span class="badge bg-danger-subtle text-danger-emphasis">Expired</span>`;
+                        else if (isLowStock) statusBadge = `<span class="badge bg-warning-subtle text-warning-emphasis">Low Stock</span>`;
+                        else statusBadge = `<span class="badge bg-success-subtle text-success-emphasis">In Stock</span>`;
+                        inventoryTableBody.innerHTML += `
+                            <tr class"align-middle">
+                                <td>${med.id}</td>
+                                <td class="fw-medium">${med.name}</td>
+                                <td>${med.batch}</td>
+                                <td class="fw-medium">${med.stock}</td>
+                                <td>${med.price.toFixed(2)}</td>
+                                <td>${med.expiry}</td>
+                                <td>${statusBadge}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editMedicine(${med.id})"><i class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteMedicine(${med.id})"><i class="bi bi-trash-fill"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                };
+
+                medicineForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const inventory = dbGet('inventory');
+                    const med = {
+                        id: document.getElementById('medicine-id').value,
+                        name: document.getElementById('medicine-name').value,
+                        batch: document.getElementById('medicine-batch').value,
+                        stock: parseInt(document.getElementById('medicine-stock').value),
+                        price: parseFloat(document.getElementById('medicine-price').value),
+                        expiry: document.getElementById('medicine-expiry').value,
+                        desc: document.getElementById('medicine-desc').value
+                    };
+                    if (med.id) {
+                        const index = inventory.findIndex(m => m.id == med.id);
+                        inventory[index] = { ...inventory[index], ...med, id: parseInt(med.id) };
+                    } else {
+                        med.id = inventory.length > 0 ? Math.max(...inventory.map(m => m.id)) + 1 : 1;
+                        inventory.push(med);
+                    }
+                    dbSet('inventory', inventory);
+                    renderInventoryTable();
+                    renderDashboard();
+                    medicineModal.hide();
+                });
+
+                document.getElementById('addMedicineModal').addEventListener('show.bs.modal', () => {
+                    medicineForm.reset();
+                    document.getElementById('medicine-id').value = '';
+                    medicineModalTitle.textContent = 'Add New Medicine';
+                    medicineSubmitBtn.textContent = 'Save Medicine';
+                });
+                
+                window.editMedicine = (id) => {
+                    const med = dbGet('inventory').find(m => m.id === id);
+                    if (!med) return;
+                    document.getElementById('medicine-id').value = med.id;
+                    document.getElementById('medicine-name').value = med.name;
+                    document.getElementById('medicine-batch').value = med.batch;
+                    document.getElementById('medicine-stock').value = med.stock;
+                    document.getElementById('medicine-price').value = med.price;
+                    document.getElementById('medicine-expiry').value = med.expiry;
+                    document.getElementById('medicine-desc').value = med.desc || '';
+                    medicineModalTitle.textContent = 'Edit Medicine';
+                    medicineSubmitBtn.textContent = 'Update Medicine';
+                    medicineModal.show();
+                };
+
+                window.deleteMedicine = (id) => {
+                    if (!confirm(`Are you sure you want to delete medicine ID ${id}?`)) return;
+                    let inventory = dbGet('inventory').filter(m => m.id !== id);
+                    dbSet('inventory', inventory);
+                    renderInventoryTable();
+                    renderDashboard();
+                };
+                
+                document.getElementById('inventory-search').addEventListener('input', (e) => {
+                    renderInventoryTable(e.target.value);
+                });
+                
+                // --- BILLING (POS) LOGIC ---
+                let currentBill = { items: [], subtotal: 0, tax: 0, total: 0 };
+                const medSearchInput = document.getElementById('billing-medicine-search');
+                const medSearchResults = document.getElementById('billing-search-results');
+                const cartItemsList = document.getElementById('billing-cart-items');
+                
+                const resetBill = () => {
+                    currentBill = { items: [], subtotal: 0, tax: 0, total: 0 };
+                    medSearchInput.value = '';
+                    medSearchResults.innerHTML = '';
+                    renderBill();
+                };
+                
+                const renderBill = () => {
+                    cartItemsList.innerHTML = '';
+                    if (currentBill.items.length === 0) {
+                        cartItemsList.innerHTML = '<li class="list-group-item text-muted text-center">Cart is empty</li>';
+                    } else {
+                        currentBill.items.forEach((item, index) => {
+                            cartItemsList.innerHTML += `
+                                <li class="list-group-item">
+                                    <div>
+                                        <h6 class="my-0">${item.name}</h6>
+                                        <small class="text-muted">₹${item.price.toFixed(2)} x ${item.quantity}</small>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <strong class="text-primary">₹${(item.price * item.quantity).toFixed(2)}</strong>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeBillItem(${index})"><i class="bi bi-x-lg"></i></button>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                    }
+                    currentBill.subtotal = currentBill.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    currentBill.tax = currentBill.subtotal * 0.05;
+                    currentBill.total = currentBill.subtotal + currentBill.tax;
+                    document.getElementById('billing-subtotal').textContent = `₹${currentBill.subtotal.toFixed(2)}`;
+                    document.getElementById('billing-tax').textContent = `₹${currentBill.tax.toFixed(2)}`;
+                    document.getElementById('billing-total').textContent = `₹${currentBill.total.toFixed(2)}`;
+                    document.getElementById('billing-checkout-btn').disabled = currentBill.items.length === 0;
+                };
+                
+                medSearchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    medSearchResults.innerHTML = '';
+                    if (query.length < 2) return;
+                    const inventory = dbGet('inventory');
+                    const today = new Date();
+                    const results = inventory.filter(med => 
+                        med.name.toLowerCase().includes(query) && 
+                        med.stock > 0 &&
+                        new Date(med.expiry) > today
+                    );
+                    results.slice(0, 5).forEach(med => {
+                        medSearchResults.innerHTML += `
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" onclick="addMedicineToBill(${med.id})">
+                                <span>${med.name} <span class="badge bg-success-subtle text-success-emphasis">${med.stock} left</span></span>
+                                <strong>₹${med.price.toFixed(2)}</strong>
+                            </a>
+                        `;
+                    });
+                });
+                
+                window.addMedicineToBill = (id) => {
+                    const med = dbGet('inventory').find(m => m.id === id);
+                    if (!med) return;
+                    const cartItem = currentBill.items.find(item => item.id === id);
+                    if (cartItem) {
+                        if (cartItem.quantity < med.stock) cartItem.quantity++;
+                        else alert('Cannot add more. No more stock available.');
+                    } else {
+                        currentBill.items.push({ id: med.id, name: med.name, price: med.price, quantity: 1 });
+                    }
+                    medSearchInput.value = '';
+                    medSearchResults.innerHTML = '';
+                    renderBill();
+                };
+                
+                window.removeBillItem = (index) => {
+                    currentBill.items.splice(index, 1);
+                    renderBill();
+                };
+
+                document.getElementById('billing-cancel-btn').addEventListener('click', resetBill);
+                document.getElementById('billing-checkout-btn').addEventListener('click', () => {
+                    if (currentBill.items.length === 0) return;
+                    const bills = dbGet('bills');
+                    const inventory = dbGet('inventory');
+                    currentBill.items.forEach(item => {
+                        const med = inventory.find(m => m.id === item.id);
+                        if (med) med.stock -= item.quantity;
+                    });
+                    dbSet('inventory', inventory);
+                    const newBill = {
+                        id: `B${Date.now()}`,
+                        date: new Date().toISOString().split('T')[0],
+                        ...currentBill
+                    };
+                    bills.push(newBill);
+                    dbSet('bills', bills);
+                    alert(`Bill ${newBill.id} created! Total: ₹${newBill.total.toFixed(2)}`);
+                    resetBill();
+                    renderDashboard();
+                });
+
+                // --- INITIALIZATION ---
+                initMockData();
+                showPage('page-dashboard');
+            };
+            
+            // --- AUTHENTICATION CHECK ---
+            // This is the main entry point for the whole script.
+            const checkAuth = () => {
+                if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                    // User is logged in, show the app
+                    appWrapper.style.display = 'flex';
+                    authWrapper.style.display = 'none';
+                    initApp(); // Start the main application
+                } else {
+                    // User is not logged in, show the auth page
+                    appWrapper.style.display = 'none';
+                    authWrapper.style.display = 'grid';
+                }
+            };
+            
+            checkAuth(); // Run the check on page load
+            
+        });
+    </script>
+</body>
+</html>
